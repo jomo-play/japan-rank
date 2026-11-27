@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>データの出典 | あなたは日本で何番目？</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html">あなたは<span>日本で何番目？</span></a>
+</header>
+<main class="page">
+  <h1>データの出典と計算方法</h1>
+  <p>このサイトの数字は、国などの公的統計にもとづく目安です。<strong>順位・人数は、各統計をもとにこのサイトが計算・加工したもので、各省庁が公表した数字ではありません。</strong></p>
+  <p>入力した数字はこの端末の中だけで計算し、どこにも送信・保存しません。ただし「Xで結果を共有」を押したときだけ、結果の文（入力した数字を含む）がXの投稿画面に入ります。</p>
+
+  <h2>計算のしかた（共通）</h2>
+  <ul>
+    <li><b>平均値と標準偏差しか公表されていない項目</b>（身長・体重・BMI・握力）は正規分布、歩数は右に裾が長いので対数正規分布を仮定して割合を出しています。実際の分布とは少しずれます。</li>
+    <li><b>「○〜○万円」のような区分ごとの割合が公表されている項目</b>は、区分の中では均等に散らばっていると仮定して直線で補間しています（例: 300〜400万円の区分に16%いるなら、350万円はその真ん中）。</li>
+    <li>いちばん上・いちばん下の区分（「2,500万円超」「5時間未満」など）は幅がわからないため、細かい順位は出さず「上位○%以内」と表示します。</li>
+    <li>年齢・初婚年齢・読書量のような整数の項目は、「同じ数の人」の半分を上に数えて順位を出します。</li>
+    <li>「約○万人中」の人数は、調査そのものの対象数か、人口推計（2024年10月1日）の該当人口に割合を当てはめた目安です。</li>
+  </ul>
+
+  <h2>項目ごとの出典</h2>
+  <div id="list"></div>
+
+  <h2>人数の換算に使った人口</h2>
+  <div class="src" id="pop"></div>
+
+  <p><a href="index.html">← トップへ戻る</a></p>
+</main>
+<script src="js/core.js"></script>
+<script src="data/population.js"></script>
+<script src="data/manifest.js"></script>
+<script>
+(function () {
+  function el(tag, text) { var e = document.createElement(tag); if (text != null) e.textContent = text; return e; }
+  function row(dl, k, v, href) {
+    dl.appendChild(el('dt', k));
+    var dd = el('dd');
+    if (href) { var a = el('a', v); a.href = href; a.target = '_blank'; a.rel = 'noopener'; dd.appendChild(a); }
+    else dd.textContent = v;
+    dl.appendChild(dd);
+  }
+  JapanRank.loadItems(window.JAPAN_RANK_MANIFEST || [], 'data/items/', function () {
+    var list = document.getElementById('list');
+    JapanRank.items().forEach(function (it) {
+      var box = el('section'); box.className = 'src'; box.id = it.id;
+      box.appendChild(el('h3', it.title));
+      var dl = el('dl');
+      row(dl, '出典', it.source.name);
+      row(dl, '使った表', it.source.table);
+      row(dl, '調査時点', it.source.year);
+      if (it.source.published) row(dl, '公表', it.source.published);
+      row(dl, 'URL', it.source.url, it.source.url);
+      row(dl, '計算方法', it.method);
+      if (it.popNote) row(dl, '人数について', it.popNote);
+      box.appendChild(dl);
+      list.appendChild(box);
+    });
+    var p = JapanRank.population();
+    var pop = document.getElementById('pop');
+    var dl = el('dl');
+    row(dl, '出典', p.source);
+    row(dl, 'URL', p.url, p.url);
+    pop.appendChild(dl);
+    if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+  });
+})();
+</script>
+<script data-goatcounter="https://jomo-play.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
